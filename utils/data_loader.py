@@ -1,26 +1,10 @@
 import psycopg2
 from typing import List, Dict
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-
+import config
 
 def save_companies(companies: List[Dict]) -> Dict[str, int]:
     """Сохраняет компании в БД и возвращает словарь employer_id -> company_id (из БД)"""
-    connection = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
+    connection = config.get_connection()
     cursor = connection.cursor()
 
     id_map = {}  # hh_id -> db_id
@@ -42,16 +26,9 @@ def save_companies(companies: List[Dict]) -> Dict[str, int]:
     connection.close()
     return id_map
 
-
 def save_vacancies(vacancies: List[Dict], company_id: int):
     """Сохраняет вакансии одной компании"""
-    connection = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
+    connection = config.get_connection()
     cursor = connection.cursor()
 
     for vacancy in vacancies:

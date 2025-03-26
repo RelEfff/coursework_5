@@ -1,48 +1,25 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-
+import config
 
 def create_database():
-    connection = psycopg2.connect(
-        dbname='postgres',
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
+    connection = psycopg2.connect(dsn=config.DB_DSN, dbname='postgres')
     connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = connection.cursor()
 
-    cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{DB_NAME}';")
+    cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{config.DB_NAME}';")
     exists = cursor.fetchone()
     if not exists:
-        cursor.execute(f'CREATE DATABASE {DB_NAME};')
-        print(f"База данных '{DB_NAME}' создана.")
+        cursor.execute(f'CREATE DATABASE {config.DB_NAME};')
+        print(f"База данных '{config.DB_NAME}' создана.")
     else:
-        print(f"База данных '{DB_NAME}' уже существует.")
+        print(f"База данных '{config.DB_NAME}' уже существует.")
 
     cursor.close()
     connection.close()
 
-
 def create_tables():
-    connection = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
+    connection = config.get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
